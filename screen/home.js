@@ -26,8 +26,8 @@ class Home extends Component {
     constructor(props) {
         super(props);
 
-        // binding list
-        this.save = this.save.bind(this);
+        // binding listas
+        //this.save = this.save.bind(this);
         this.deleteAll = this.deleteAll.bind(this);
         this.addReview = this.addReview.bind(this);
         this.load = this.load.bind(this);
@@ -74,7 +74,7 @@ class Home extends Component {
     {
         db.transaction(tx => {
             tx.executeSql(
-                "create table if not exists reviews (id integer primary key not null, title text, body text, createdTime int, isArchive bool);"
+                "create table if not exists reviews (id integer primary key not null, title text, body text, createdTime int, isArchive int);"
             );
 
             tx.executeSql("select * from reviews", [], (_, { rows: { _array, length } }) => {
@@ -94,32 +94,29 @@ class Home extends Component {
         // }
     }
 
-    async save()
-    {
-        try {
-            await AsyncStorage.setItem("reviews", JSON.stringify(this.state.reviews));        
-        }
-        catch (err) {
-            alert(err);
-        }
-    }
+    // async save()
+    // {
+    //     try {
+    //         await AsyncStorage.setItem("reviews", JSON.stringify(this.state.reviews));        
+    //     }
+    //     catch (err) {
+    //         alert(err);
+    //     }
+    // }
 
     async deleteAll()
     {
-        try {
-            await AsyncStorage.removeItem('reviews');
-        }
-        catch (err) {
-            alert(err)
-        }
-        finally {
-            this.setState({reviews: []});
-        }
+        // delete all the items in the table
+        db.transaction(tx => {
+            tx.executeSql(
+                "drop table reviews;"
+            );
+        });
+        this.setState({reviews: []});
     }
 
     async alertRemove() {
         Alert.alert("Dangerous", "Do you want to delete all items?",
-        
         [{text: "Yes", onPress: () => this.deleteAll()},
          {text: "No", onPress: () => {console.log("cancel")}}],
          {cancelable: true}
@@ -131,15 +128,13 @@ class Home extends Component {
         review.createdTime = Date.now();
         db.transaction(
             (tx) => {
-                tx.executeSql("insert into reviews (title, body, createdTime) values ( ?, ?, ?)", 
+                tx.executeSql("insert into reviews (title, body, createdTime, isArchive) values ( ?, ?, ?, 0)", 
                 [review.title, review.body, review.createdTime]);
 
                 tx.executeSql("select * from reviews", [], (_, { rows: { _array, length } }) => {
-
                     console.log('query after adding',JSON.stringify(_array));
                     console.log('the length of the arrays ', length);
                 });
-                
             }, () => {console.log("fail"), () => {console.log("success")}});
 
         try {
@@ -151,7 +146,7 @@ class Home extends Component {
         finally {
             this.setState({modalOpen:false});
         }    
-        this.save();
+        //this.save();
     }
 
     async archive(item) {
@@ -231,13 +226,6 @@ class Home extends Component {
                     size={24}
                     style={styles.modalToggle}
                     onPress={this.alertRemove}
-                />
-                
-                <MaterialIcons
-                    name='save'
-                    size={24}
-                    style={styles.modalToggle}
-                    onPress={this.save}
                 />
                 </View>
                 
