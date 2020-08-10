@@ -19,9 +19,9 @@ import update from 'react-addons-update';
 class Archive extends Component {
     constructor(props) {
         super(props);
-        this.save = this.save.bind(this);
+        //this.save = this.save.bind(this);
         this.remove = this.remove.bind(this);
-        this.load = this.load.bind(this)
+        this.load = this.load.bind(this);
         this.alertRemove = this.alertRemove.bind(this);
         this.updateReviews = this.updateReviews.bind(this);
         this.navigation = props.navigation;
@@ -62,16 +62,6 @@ class Archive extends Component {
         try {
             let loadedArchives = await AsyncStorage.getItem("archives");  
             this.setState({archives: loadedArchives != null ? JSON.parse(loadedArchives) : []});
-        }
-        catch (err) {
-            alert(err);
-        }
-    }
-
-    async save()
-    {
-        try {
-            await AsyncStorage.setItem("archives", JSON.stringify(this.state.archives));        
         }
         catch (err) {
             alert(err);
@@ -137,9 +127,7 @@ class Archive extends Component {
     }
 }
 
-
 export default Archive;
-
 
 const styles = StyleSheet.create({
     modalToggle: {
@@ -162,4 +150,4 @@ const styles = StyleSheet.create({
     toolPanel: {
         flexDirection: 'row-reverse',
     }
-})
+});

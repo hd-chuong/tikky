@@ -20,7 +20,7 @@ function displayTime(date)
 
     else if (tickDiff < 1000 * 60 * 60)
     {
-        return "" + Math.floor(tickDiff / 1000 / 60) + " min ago.";
+        return "" + Math.floor(tickDiff / 1000 / 60) + " mins ago.";
     }
     else if (tickDiff < 1000 * 60 * 60 * 24)
     {
@@ -35,15 +35,10 @@ function displayTime(date)
 
 export default function Review({navigation}) {
 
-    const [title, setTitle] = useState(navigation.getParam('title'));
-    const [body, setBody] = useState(navigation.getParam('body'));
-    const key = navigation.getParam('key');
+    const [item, setItem] = useState(navigation.getParam('item'));
     const pressHandler = () => {
         var updateReview = navigation.getParam('updateReview');
-        updateReview(key, {title: title, body: body, key: key, createdTime: navigation.getParam('createdTime'), rating: navigation.getParam('rating')});
-        
-        console.log('new title', title);
-        console.log('new body', body);
+        updateReview(item.id, item);
         navigation.goBack();
     }
 
@@ -51,23 +46,13 @@ export default function Review({navigation}) {
         <View style={globalStyles.container}>
                 <TextInput 
                     style={globalStyles.titleText} 
-                    defaultValue={navigation.getParam('title')}
-                    onChangeText={(newTitle) => {setTitle(newTitle)}}    
+                    defaultValue={navigation.getParam('item').title}
+                    onChangeText={(newTitle) => {setItem({...item, title: newTitle})}}    
                 />
-                <TextInput defaultValue={navigation.getParam('body')} onChangeText={(newBody) => {setBody(newBody)}} />
-                
-                <Text>Created {displayTime(new Date(navigation.getParam('createdTime')))}</Text>
+
+                <TextInput defaultValue={navigation.getParam('item').body} onChangeText={(newBody) => {setItem({...item, body: newBody})} } />
+                <Text>Created {displayTime(new Date(navigation.getParam('item').createdTime))}</Text>
                 <Button title='Update' onPress={pressHandler}/>
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-
-});
-
-// const styles = StyleSheet.create({
-//     container: {
-//         padding: 24
-//     }
-// })

@@ -12,6 +12,7 @@ import {StyleSheet,
         AsyncStorage,
         Alert,
     } from 'react-native';
+
 import {globalStyles} from '../styles/global';
 import Card from '../components/card';
 import {MaterialIcons} from '@expo/vector-icons';
@@ -26,15 +27,13 @@ class Home extends Component {
     constructor(props) {
         super(props);
 
-        // binding listas
-        //this.save = this.save.bind(this);
+        // binding lists
         this.deleteAll = this.deleteAll.bind(this);
         this.addReview = this.addReview.bind(this);
         this.load = this.load.bind(this);
         this.archive = this.archive.bind(this);
         this.alertRemove = this.alertRemove.bind(this);
-        this.updateReviews = this.updateReviews.bind(this);
-                
+        this.updateReviews = this.updateReviews.bind(this);                
         this.navigation = props.navigation;
         
         this.state = {
@@ -42,16 +41,18 @@ class Home extends Component {
             modalOpen: false,
         }
 
+        console.log("constructor again");
         this.load();
+
     }
 
-    updateReviews(key, newData)
+    updateReviews(id, newData)
     {
         var targetIndex = -1;
         for (let i = 0; i < this.state.reviews.length; ++i)
         {
             let review = this.state.reviews[i];
-            if (review.key == key)
+            if (review.id == id)
             {
                 targetIndex = i;
             }
@@ -66,8 +67,15 @@ class Home extends Component {
                     }
                 }
             }))
-
         }
+
+        db.transaction(
+            (tx) => {
+                tx.executeSql("UPDATE reviews SET title = ?, body = ? WHERE id = ?;", 
+                [newData.title, newData.body, id]);
+                }, () => {console.log("fail"), () => {console.log("success")}}
+        );
+
     }
 
     async load()    
@@ -78,20 +86,10 @@ class Home extends Component {
             );
 
             tx.executeSql("select * from reviews", [], (_, { rows: { _array, length } }) => {
-                console.log('query all databases',JSON.stringify(_array))
                 this.setState({reviews: _array != null ? _array: []});
             }
             );
-        }, 
-        null);
-
-        // try {
-        //     let loadedReviews = await AsyncStorage.getItem("reviews");  
-        //     this.setState({reviews: loadedReviews != null ? JSON.parse(loadedReviews) : []});
-        // }
-        // catch (err) {
-        //     alert(err);
-        // }
+        }, null);
     }
 
     // async save()
@@ -124,72 +122,55 @@ class Home extends Component {
     }
 
     async addReview(review) {
-        review.key = Date.now();
+        review.id = Date.now();
         review.createdTime = Date.now();
+        review.isArchive = 0;
+
+        this.setState( {reviews: [review,...this.state.reviews] });
+        this.setState({modalOpen:false});
+    
+
         db.transaction(
             (tx) => {
-                tx.executeSql("insert into reviews (title, body, createdTime, isArchive) values ( ?, ?, ?, 0)", 
-                [review.title, review.body, review.createdTime]);
-
-                tx.executeSql("select * from reviews", [], (_, { rows: { _array, length } }) => {
-                    console.log('query after adding',JSON.stringify(_array));
-                    console.log('the length of the arrays ', length);
-                });
-            }, () => {console.log("fail"), () => {console.log("success")}});
-
-        try {
-            this.setState( {reviews: [review,...this.state.reviews] });
-            
-        } catch(err) {
-            alert(err);
-        }
-        finally {
-            this.setState({modalOpen:false});
-        }    
-        //this.save();
+                tx.executeSql("insert into reviews (id, title, body, createdTime, isArchive) values (?, ?, ?, ?, 0);", 
+                [review.id, review.title, review.body, review.createdTime]);
+            }, () => console.log("fail add review"));
     }
 
-    async archive(item) {
+    async archive(id) {
         
-        try {
-            // loaded item
-            let loadedArchives = await AsyncStorage.getItem("archives"); 
-            loadedArchives = JSON.stringify(loadedArchives);
-            console.log(loadedArchives);    
-            
-            //save item to archives
-            let newArchives = [item, ...loadedArchives];
-            
-            
-            await AsyncStorage.setItem("archives", JSON.stringify(newArchives));
-            
-            //delete item from archives
-            let targetIndex = -1;
+        db.transaction(
+            (tx) => {
+                tx.executeSql("UPDATE reviews SET isArchive = 1 WHERE id = ?;", [id]);
+            }, () => {console.log("fail"), () => {console.log("success")}});
+        
+            var targetIndex = -1;
             for (let i = 0; i < this.state.reviews.length; ++i)
             {
-                if (item.key == this.state.reviews[i].key)
+                let review = this.state.reviews[i];
+                if (review.id == id)
                 {
                     targetIndex = i;
-                    break;
                 }
             }
-
+    
             if (targetIndex != -1)
             {
-                let newReviews = this.state.reviews;
-                newReviews.splice(targetIndex, 1);
-                this.setState({reviews: newReviews});
+                this.setState(update(this.state, {
+                    reviews: {
+                        [targetIndex]: {
+                            $set: {...this.state.reviews[targetIndex], isArchive : 1}
+                        }
+                    }
+                }))
             }
-        }
-        catch (err) 
-        {
-            alert(err);
-        }
     }
     
     render() {
         let emptyMessage = null;
-        if (this.state.reviews.length == 0)
+        
+        let homeReviews = this.state.reviews.filter((item) => (item.isArchive == 0));
+        if (homeReviews.length == 0)
         {
             emptyMessage = <Text>There is no stickie left.</Text>
         }
@@ -232,13 +213,13 @@ class Home extends Component {
                 {emptyMessage}
                 
                 <FlatList
-                    data={this.state.reviews}
+                    data={homeReviews}
                     renderItem={({item}) => {
                         return (
-                            <TouchableOpacity onPress={()=> this.navigation.navigate('Review', {...item, updateReview: this.updateReviews})}>
+                            <TouchableOpacity onPress={()=> this.navigation.navigate('Review', {item, updateReview: this.updateReviews})}>
                                 <Card>
                                     <Text style={globalStyles.titleText}>{item.title}
-                                    <MaterialIcons name='archive' size={18} onPress={() => {this.archive(item)}}></MaterialIcons></Text>
+                                    <MaterialIcons name='archive' size={18} onPress={() => {this.archive(item.id)}}></MaterialIcons></Text>
                                 </Card>
                             </TouchableOpacity>
                         )
@@ -249,9 +230,7 @@ class Home extends Component {
     }
 }
 
-
 export default Home;
-
 
 const styles = StyleSheet.create({
     modalToggle: {
