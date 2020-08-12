@@ -34,7 +34,7 @@ export default function ReviewForm({addReview}) {
             }}
             validationSchema={ReviewSchema}
             onSubmit={(values, actions) => {
-                console.log(values);
+                // console.log(values);
                 actions.resetForm();
                 addReview(values);
             }}

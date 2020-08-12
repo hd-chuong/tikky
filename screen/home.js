@@ -24,7 +24,6 @@ const Home = ({navigation}) => {
 
     const [modalOpen, setModalOpen] = useState(false);
     const reviews = useContext(ReviewsContext);
-    console.log(reviews);
 
     let emptyMessage = null;
     
@@ -44,7 +43,7 @@ const Home = ({navigation}) => {
                             style={{...styles.modalToggle, ...styles.modalClose}}
                             onPress={() => {setModalOpen(false)}}
                         />
-                        <ReviewForm addReview={reviews.addReview}/>
+                        <ReviewForm addReview={(review) => {reviews.addReview(review); setModalOpen(false)} }/>
                     </View>
                 </TouchableWithoutFeedback>
             </Modal>

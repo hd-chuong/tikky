@@ -1,7 +1,6 @@
 import React from 'react';
 import * as SQLite from 'expo-sqlite';
 import update from 'react-addons-update';
-import Constants from 'expo-constants';
 import {Alert} from 'react-native';
 
 const db = SQLite.openDatabase("db.db");
@@ -90,7 +89,6 @@ class ReviewProvider extends React.Component {
         console.log("add new review ", review)
 
         this.setState( {reviews: [review,...this.state.reviews] });
-        this.setState({modalOpen:false});
     
 
         db.transaction(
@@ -100,7 +98,8 @@ class ReviewProvider extends React.Component {
             }, () => console.log("fail add review"));
     }
 
-    async alertRemove(){
+    async alertRemove() 
+    {
         Alert.alert("Dangerous", "Do you want to delete all items?",
         [{text: "Yes", onPress: () => this.deleteAll()},
          {text: "No", onPress: () => {console.log("cancel")}}],
@@ -168,7 +167,8 @@ class ReviewProvider extends React.Component {
         }
     }
 
-    render() {
+    render() 
+    {
         return (
             <ReviewsContext.Provider 
                 value={{

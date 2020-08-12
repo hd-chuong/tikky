@@ -1,4 +1,4 @@
-import React, {useState, useEffect, Component} from 'react';
+import React, {useState, useContext, Component} from 'react';
 
 import {StyleSheet, 
         View, 
@@ -15,50 +15,56 @@ import {globalStyles} from '../styles/global';
 import Card from '../components/card';
 import {MaterialIcons} from '@expo/vector-icons';
 import update from 'react-addons-update';
+import {ReviewsContext} from '../provider/reviewProvider';
 
-class Archive extends Component {
-    constructor(props) {
-        super(props);
+const Archive = ({navigation}) => {
+    // constructor(props) {
+    //     super(props);
 
-        this.remove = this.remove.bind(this);
-        this.load = this.load.bind(this);
-        this.alertRemove = this.alertRemove.bind(this);
-        this.updateReviews = this.updateReviews.bind(this);
-        this.navigation = props.navigation;
+    //     this.remove = this.remove.bind(this);
+    //     this.load = this.load.bind(this);
+    //     this.alertRemove = this.alertRemove.bind(this);
+    //     this.updateReviews = this.updateReviews.bind(this);
+    //     this.navigation = props.navigation;
         
-        this.state = {
-            archives: [],
-            modalOpen: false,
-        }
-        this.load();
-    }
-    render() {
+    //     this.state = {
+    //         archives: [],
+    //         modalOpen: false,
+    //     }
+    //     this.load();
+    // }
+        const reviews = useContext(ReviewsContext);
+        
         let emptyMessage = null;
-        if (this.state.archives.length == 0)
+    
+        let archiveReviews = reviews.reviews.filter((item) => (item.isArchive == 1));
+        if (archiveReviews.length == 0)
         {
-            emptyMessage = <Text>There is no stickie left.</Text>
+            emptyMessage = <Text>There is no archive left.</Text>
         }
 
         return (
             <ImageBackground source={require('../assets/archive_bg.png')}style={globalStyles.container}>
-                <View style={styles.toolPanel}>
+                {/* <View style={styles.toolPanel}>
                     <MaterialIcons
                         name='delete'
                         size={24}
                         style={styles.modalToggle}
                         onPress={this.alertRemove}
                     />
-                </View>
+                </View> */}
                 
                 {emptyMessage}
                 
                 <FlatList
-                    data={this.state.archives}
+                    data={archiveReviews}
                     renderItem={({item}) => {
                         return (
-                            <TouchableOpacity onPress={()=> this.navigation.navigate('Review', {...item, updateReview: this.updateReviews})}>
+                            <TouchableOpacity onPress={()=> navigation.navigate('Review', {...item, updateReview: reviews.updateReviews})}>
                                 <Card>
-                                    <Text style={globalStyles.titleText}>{item.title}<MaterialIcons name='archive' size={18}></MaterialIcons></Text>
+                                    <Text style={globalStyles.titleText}>{item.title}
+                                    <MaterialIcons name='backup' size={18} onPress={() => reviews.unarchive(item.id)}></MaterialIcons>
+                                    </Text>
                                 </Card>
                             </TouchableOpacity>
                         )
@@ -66,7 +72,6 @@ class Archive extends Component {
                 />
             </ImageBackground>
         )
-    }
 }
 
 export default Archive;
