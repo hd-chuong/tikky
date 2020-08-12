@@ -19,7 +19,7 @@ import update from 'react-addons-update';
 class Archive extends Component {
     constructor(props) {
         super(props);
-        //this.save = this.save.bind(this);
+
         this.remove = this.remove.bind(this);
         this.load = this.load.bind(this);
         this.alertRemove = this.alertRemove.bind(this);
@@ -32,64 +32,6 @@ class Archive extends Component {
         }
         this.load();
     }
-
-    updateReviews(key, newData)
-    {
-        var targetIndex = -1;
-        for (let i = 0; i < this.state.archives.length; ++i)
-        {
-            let review = this.state.archives[i];
-            if (review.key == key)
-            {
-                targetIndex = i;
-            }
-        }
-        console.log('new data', newData)
-        if (targetIndex != -1)
-        {
-            this.setState(update(this.state, {
-                archives: {
-                    [targetIndex]: {
-                        $set: newData
-                    }
-                }
-            }))
-        }
-    }
-
-    async load()    
-    {
-        try {
-            let loadedArchives = await AsyncStorage.getItem("archives");  
-            this.setState({archives: loadedArchives != null ? JSON.parse(loadedArchives) : []});
-        }
-        catch (err) {
-            alert(err);
-        }
-    }
-
-    async remove()
-    {
-        try {
-            await AsyncStorage.removeItem('archives');
-        }
-        catch (err) {
-            alert(err)
-        }
-        finally {
-            this.setState({archives: []});
-        }
-    }
-
-    async alertRemove() {
-        Alert.alert("Dangerous", "Do you want to delete all items?",
-        
-        [{text: "Yes", onPress: () => this.remove()},
-         {text: "No", onPress: () => {console.log("cancel")}}],
-         {cancelable: true}
-        )
-    }
-   
     render() {
         let emptyMessage = null;
         if (this.state.archives.length == 0)

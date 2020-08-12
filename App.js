@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 // import Home from "./screen/home";
 import {AppLoading} from 'expo';
 import * as Font from 'expo-font';
-import Navigator from './routes/drawer'
+import Navigator from './routes/drawer';
+import {ReviewProvider} from './provider/reviewProvider';
 
 const getFonts = () => {
   return Font.loadAsync(
@@ -13,13 +14,14 @@ const getFonts = () => {
   );
 }
 
-
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   if (fontsLoaded) {
     return (
+    <ReviewProvider>
       <Navigator/>
+    </ReviewProvider>
     );
   } else {
     return (<AppLoading
