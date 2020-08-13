@@ -100,7 +100,7 @@ class ReviewProvider extends React.Component {
     {
         Alert.alert("Dangerous", "Do you want to delete all items?",
         [{text: "Yes", onPress: () => this.deleteAll()},
-         {text: "No", onPress: () => {console.log("cancel")}}],
+         {text: "No", onPress: () => {("cancel")}}],
          {cancelable: true}
         )
     }

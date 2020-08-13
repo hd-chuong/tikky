@@ -9,7 +9,8 @@ import {
         Modal,
         TouchableWithoutFeedback,
         Keyboard,
-        AsyncStorage,
+        TouchableHighlight,
+        Button,
         Alert,
     } from 'react-native';
 
@@ -17,8 +18,17 @@ import {globalStyles} from '../styles/global';
 import Card from '../components/card';
 import {MaterialIcons} from '@expo/vector-icons';
 import ReviewForm from './reviewForm'
-
 import {ReviewsContext} from '../provider/reviewProvider';
+import Swipeable from 'react-native-swipeable-row';
+const rightButtons = [
+    <TouchableHighlight><Button 
+                            title="Archive" 
+                            color="red" 
+                            style={{width: 10}} 
+                            onPress={() => reviews.archive(item.id)}
+                        />
+    </TouchableHighlight>,
+  ];
 
 const Home = ({navigation}) => {
 
@@ -70,13 +80,15 @@ const Home = ({navigation}) => {
                 data={homeReviews}
                 renderItem={({item}) => {
                     return (
-                        <TouchableOpacity onPress={()=> navigation.navigate('Review', {item, updateReview: reviews.updateReviews})}>
-                            <Card>
-                                <Text style={globalStyles.titleText}>{item.title}
-                                <MaterialIcons name='archive' size={18} onPress={() => {reviews.archive(item.id)}}></MaterialIcons></Text>
-                                <Text>{item.body.substring(0, 50)}</Text>
-                            </Card>
-                        </TouchableOpacity>
+                        <Swipeable rightContent={rightButtons}>
+                            <TouchableOpacity onPress={()=> navigation.navigate('Review', {item, updateReview: reviews.updateReviews})}>
+                                <Card>
+                                    <Text style={globalStyles.titleText}>{item.title}
+                                    <MaterialIcons name='archive' size={18} onPress={() => {reviews.archive(item.id)}}></MaterialIcons></Text>
+                                    <Text>{item.body.substring(0, 50)}</Text>
+                                </Card>
+                            </TouchableOpacity>
+                        </Swipeable>
                     )
                 }}
             />
