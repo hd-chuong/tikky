@@ -86,8 +86,6 @@ class ReviewProvider extends React.Component {
         review.createdTime = Date.now();
         review.isArchive = 0;
 
-        console.log("add new review ", review)
-
         this.setState( {reviews: [review,...this.state.reviews] });
     
 

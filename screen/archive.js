@@ -44,7 +44,7 @@ const Archive = ({navigation}) => {
         }
 
         return (
-            <ImageBackground source={require('../assets/archive_bg.png')}style={globalStyles.container}>
+            <ImageBackground source={require('../assets/game_bg.png')}style={globalStyles.container}>
                 {/* <View style={styles.toolPanel}>
                     <MaterialIcons
                         name='delete'
@@ -59,12 +59,14 @@ const Archive = ({navigation}) => {
                 <FlatList
                     data={archiveReviews}
                     renderItem={({item}) => {
+                        console.log("archive single item", {...item, updateReview: reviews.updateReviews})
                         return (
-                            <TouchableOpacity onPress={()=> navigation.navigate('Review', {...item, updateReview: reviews.updateReviews})}>
+                            <TouchableOpacity onPress={()=> navigation.navigate('Review', {item, updateReview: reviews.updateReviews})}>
                                 <Card>
                                     <Text style={globalStyles.titleText}>{item.title}
                                     <MaterialIcons name='backup' size={18} onPress={() => reviews.unarchive(item.id)}></MaterialIcons>
                                     </Text>
+                                    
                                 </Card>
                             </TouchableOpacity>
                         )

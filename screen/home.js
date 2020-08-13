@@ -74,6 +74,7 @@ const Home = ({navigation}) => {
                             <Card>
                                 <Text style={globalStyles.titleText}>{item.title}
                                 <MaterialIcons name='archive' size={18} onPress={() => {reviews.archive(item.id)}}></MaterialIcons></Text>
+                                <Text>{item.body.substring(0, 50)}</Text>
                             </Card>
                         </TouchableOpacity>
                     )
