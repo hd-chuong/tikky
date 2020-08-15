@@ -18,21 +18,6 @@ import update from 'react-addons-update';
 import {ReviewsContext} from '../provider/reviewProvider';
 
 const Archive = ({navigation}) => {
-    // constructor(props) {
-    //     super(props);
-
-    //     this.remove = this.remove.bind(this);
-    //     this.load = this.load.bind(this);
-    //     this.alertRemove = this.alertRemove.bind(this);
-    //     this.updateReviews = this.updateReviews.bind(this);
-    //     this.navigation = props.navigation;
-        
-    //     this.state = {
-    //         archives: [],
-    //         modalOpen: false,
-    //     }
-    //     this.load();
-    // }
         const reviews = useContext(ReviewsContext);
         
         let emptyMessage = null;

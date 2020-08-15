@@ -20,15 +20,7 @@ import {MaterialIcons} from '@expo/vector-icons';
 import ReviewForm from './reviewForm'
 import {ReviewsContext} from '../provider/reviewProvider';
 import Swipeable from 'react-native-swipeable-row';
-const rightButtons = [
-    <TouchableHighlight><Button 
-                            title="Archive" 
-                            color="red" 
-                            style={{width: 10}} 
-                            onPress={() => reviews.archive(item.id)}
-                        />
-    </TouchableHighlight>,
-  ];
+
 
 const Home = ({navigation}) => {
 
@@ -75,16 +67,19 @@ const Home = ({navigation}) => {
                     onPress={reviews.alertRemove}
                 />
             </View>
+            
 
             <FlatList
                 data={homeReviews}
                 renderItem={({item}) => {
+
                     return (
-                        <Swipeable rightContent={rightButtons}>
+                        <Swipeable 
+                            onSwipeRelease={() => {reviews.archive(item.id)} }
+                        >
                             <TouchableOpacity onPress={()=> navigation.navigate('Review', {item, updateReview: reviews.updateReviews})}>
                                 <Card>
-                                    <Text style={globalStyles.titleText}>{item.title}
-                                    <MaterialIcons name='archive' size={18} onPress={() => {reviews.archive(item.id)}}></MaterialIcons></Text>
+                                    <Text style={globalStyles.titleText}>{item.title}</Text> 
                                     <Text>{item.body.substring(0, 50)}</Text>
                                 </Card>
                             </TouchableOpacity>

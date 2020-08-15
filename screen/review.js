@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Text, Button, Image} from 'react-native';
+import {StyleSheet, View, Text, Button, FlatList, CheckBox} from 'react-native';
 import {globalStyles, images} from '../styles/global';
 import Card from '../components/card';
 import { TextInput } from 'react-native-gesture-handler';
@@ -15,7 +15,7 @@ function displayTime(date)
     
     if (tickDiff < 1000 * 60)
     {
-        return "A few seconds ago.";
+        return "a few seconds ago.";
     }
 
     else if (tickDiff < 1000 * 60 * 60)
@@ -33,26 +33,93 @@ function displayTime(date)
     }
 }
 
-export default function Review({navigation}) {
-
-    const [item, setItem] = useState(navigation.getParam('item'));
-    const pressHandler = () => {
-        var updateReview = navigation.getParam('updateReview');
-        updateReview(item.id, item);
-        navigation.goBack();
+export default class Review extends React.Component {
+    constructor(props)
+    {
+        super(props);
+        this.navigation = props.navigation;
+        this.state = {
+            item: this.navigation.getParam('item'),
+            checklist: [],
+            newCheckbox: {hasDone: false, body: ""}
+        }
+        this.pressHandler = this.pressHandler.bind(this);
+        this.addNewItem = this.addNewItem.bind(this);
     }
 
-    return (
-        <View style={globalStyles.container}>
-                <TextInput 
-                    style={globalStyles.titleText} 
-                    defaultValue={navigation.getParam('item').title}
-                    onChangeText={(newTitle) => {setItem({...item, title: newTitle})}}    
-                />
+    pressHandler()
+    {
+        var updateReview = this.navigation.getParam('updateReview');
+        updateReview(this.state.item.id, this.state.item);
+        this.navigation.goBack();
+    }
+    
+    addNewItem()
+    {
+        let newItem = {...this.state.newCheckbox, id: Date.now()};
+        this.setState({checklist: [...this.state.checklist, newItem] });
+    }
 
-                <TextInput defaultValue={navigation.getParam('item').body} onChangeText={(newBody) => {setItem({...item, body: newBody})} } />
-                <Text>Created {displayTime(new Date(navigation.getParam('item').createdTime))}</Text>
-                <Button title='Update' onPress={pressHandler}/>
-        </View>
-    )
+    render() 
+    {
+        return (
+            <View style={globalStyles.container}>
+                    <View style={styles.titleLine}>
+                    <TextInput 
+                        multiline
+                        style={globalStyles.titleText} 
+                        defaultValue={this.state.item.title}
+                        onChangeText={(newTitle) => {this.setState({item: {...this.state.item, title: newTitle}})}}    
+                    /><Text>Created {displayTime(new Date(this.state.item.createdTime))}</Text>
+                    </View>
+                    <TextInput 
+                        multiline 
+                        defaultValue={this.state.item.body} 
+                        onChangeText={(newBody) => {this.setState({item: {...this.state.item, body: newBody}})} } />
+    
+                    <View>
+                        <FlatList
+                        data={this.state.checklist}
+                        renderItem={({item}) => {
+                            return (<View style={styles.checkboxLine}>
+                                        <CheckBox
+                                            value={item.hasDone}
+                                        /><Text>{item.body}</Text>
+                                    </View>
+                            )
+                        }}
+                        />
+                        <View style={styles.checkboxLine}>
+                            <CheckBox 
+                                value={this.state.newCheckbox.hasDone} 
+                                onValueChange={() => 
+                                        this.setState({
+                                                    hasDone: this.state.newCheckbox.hasDone, 
+                                                    body: this.state.newCheckbox.body})
+                                }/>
+                            <TextInput 
+                                placeholder={"Enter an item here"} 
+                                defaultValue={this.state.newCheckbox.body}
+                                onChangeText={(body) => this.setState({newCheckbox: {hasDone: this.state.newCheckbox.hasDone, body}})}
+                                onSubmitEditing={()=> {this.addNewItem(); this.setState({newCheckbox: {hasDone: false, body: ""}})}}
+                            />
+                        </View>
+
+                        <Button title='Update' onPress={this.pressHandler}/>
+                    </View>
+            </View>
+        )
+    }
 }
+
+const styles = StyleSheet.create({
+    checkboxLine: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    titleLine: {
+        flexDirection: 'row',
+        alignItems: 'center',
+
+    }
+})
