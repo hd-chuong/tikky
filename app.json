@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gamezone4",
-    "slug": "gamezone4",
+    "name": "gamezone-list",
+    "slug": "gamezone-list",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
